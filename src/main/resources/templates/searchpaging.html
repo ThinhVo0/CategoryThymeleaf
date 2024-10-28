@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category List</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<div class="container mt-5">
+    <h1>Category Management</h1>
+
+    <div th:if="${message}">
+        <div th:text="${message}" class="alert alert-success"></div>
+    </div>
+
+    <div class="d-flex justify-content-between mb-3">
+        <a th:href="@{/category/add}" class="btn btn-primary">Add New Category</a>
+
+        <!-- Search form -->
+        <form th:action="@{/category/searchpaginated}" method="get" class="d-flex">
+            <input type="text" name="keyword" id="name" placeholder="Nhập từ khóa để tìm" th:value="${name}" class="form-control me-2" />
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+
+    <!-- Page size selection -->
+    <form method="get" th:action="@{/category/searchpaginated}" class="mb-3">
+        <label for="size" class="me-2">Page Size:</label>
+        <select name="size" id="size" class="form-select" onchange="this.form.submit()">
+            <option th:value="3" th:selected="${categoryPage.size == 3}">3</option>
+            <option th:value="5" th:selected="${categoryPage.size == 5}">5</option>
+            <option th:value="10" th:selected="${categoryPage.size == 10}">10</option>
+            <option th:value="15" th:selected="${categoryPage.size == 15}">15</option>
+            <option th:value="20" th:selected="${categoryPage.size == 20}">20</option>
+        </select>
+    </form>
+
+    <div th:if="${!categoryPage.hasContent()}" class="alert alert-warning">
+        No Category Found
+    </div>
+
+    <div th:if="${categoryPage.hasContent()}">
+        <table class="table table-striped table-bordered">
+            <thead class="table-light">
+            <tr>
+                <th>STT</th>
+                <th>Category Name</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="cate, status : ${categoryPage.content}">
+                <td th:text="${status.index + 1}"></td>
+                <td th:text="${cate.name}"></td>
+                <td>
+                    <a th:href="@{/category/edit/{id}(id=${cate.getId()})}" class="btn btn-warning btn-sm">Edit</a>
+                    <a th:href="@{/category/delete/{id}(id=${cate.getId()})}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div th:if="${categoryPage.totalPages > 0}">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:class="${categoryPage.number == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/category/searchpaginated(name=${name}, size=${categoryPage.size}, page=1)}">First</a>
+                    </li>
+                    <li class="page-item" th:class="${categoryPage.number == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/category/searchpaginated(name=${name}, size=${categoryPage.size}, page=${categoryPage.number})}">Previous</a>
+                    </li>
+                    <li th:each="pageNumber : ${pageNumbers}" th:class="${pageNumber == categoryPage.number + 1 ? 'active' : ''}">
+                        <a th:href="@{/category/searchpaginated(name=${name}, size=${categoryPage.size}, page=${pageNumber})}" class="page-link" th:text="${pageNumber}"></a>
+                    </li>
+                    <li class="page-item" th:class="${categoryPage.number + 1 == categoryPage.totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/category/searchpaginated(name=${name}, size=${categoryPage.size}, page=${categoryPage.number + 2})}">Next</a>
+                    </li>
+                    <li class="page-item" th:class="${categoryPage.number + 1 == categoryPage.totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/category/searchpaginated(name=${name}, size=${categoryPage.size}, page=${categoryPage.totalPages})}">Last</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
